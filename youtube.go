@@ -4,9 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kkdai/youtube/v2"
-	"log"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -36,20 +34,11 @@ func (y *YoutubeClient) GetVideoId(videoUrl string) (string, error) {
 	}
 }
 
-func (y *YoutubeClient) GetTranscript(videoUrl string, maxDuration time.Duration) (string, error) {
-	videoId := videoUrl
-	if strings.Contains(videoUrl, "http") {
-		var err error
-		videoId, err = y.GetVideoId(videoUrl)
-		if err != nil {
-			return "", err
-		}
-	}
+func (y *YoutubeClient) GetTranscript(videoId string, maxDuration time.Duration) (string, error) {
 	video, err := y.client.GetVideo(videoId)
 	if err != nil {
 		return "", err
 	}
-	log.Printf("Video - %+v\n", video)
 
 	if len(video.CaptionTracks) == 0 {
 		return "", errors.New("there is no subtitles available, cannot get the summary of the video")

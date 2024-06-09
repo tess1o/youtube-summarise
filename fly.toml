@@ -13,6 +13,8 @@ primary_region = 'waw'
 [env]
   PORT = '8080'
   MAX_VIDEO_DURATION_MINUTES = 20
+  CACHE_EXPIRATION_HOURS = 12
+  REQUEST_PER_MINUTE_RATE = 3
 
 [http_service]
   internal_port = 8080

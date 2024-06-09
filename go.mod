@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/kkdai/youtube/v2 v2.10.1
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sashabaranov/go-openai v1.24.1
 )
 
