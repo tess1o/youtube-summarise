@@ -1,6 +1,8 @@
 # Youtube Video Summary
 
-A small app that provides a short summary of any YouTube video. The logic is the following:
+![screenshot](screenshot.png)
+
+A small web app that provides a short summary of any YouTube video. The logic is the following:
 
 1. Fetch captions from YouTube video
 2. Ask ChatGPT to provide the summary of the video by provided captions
