@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Youtube Video Summary</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            background: white;
+            padding: 2em;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 1em;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.7em;
+            margin-bottom: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1.1em;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.7em;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #spinner {
+            display: none;
+            margin-top: 1em;
+            font-size: 1.1em;
+            color: #007BFF;
+        }
+
+        .spinner-border {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            vertical-align: text-bottom;
+            border: 0.25em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border 0.75s linear infinite;
+        }
+
+        @keyframes spinner-border {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #result, #error {
+            margin-top: 1em;
+            font-size: 1.2em;
+        }
+
+        #result {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        #error {
+            color: #dc3545;
+        }
+    </style>
+    <script>
+        function submitForm() {
+            var input = document.getElementById("userInput").value;
+            document.getElementById("spinner").style.display = "inline-block";
+            document.getElementById("result").style.display = "none";
+            document.getElementById("error").style.display = "none";
+            document.getElementById("result").innerText = "";
+            document.getElementById("error").innerText = "";
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/summary", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    document.getElementById("spinner").style.display = "none";
+                    if (xhr.status === 200) {
+                        document.getElementById("result").style.display = "";
+                        document.getElementById("result").innerText = xhr.responseText;
+                    } else {
+                        document.getElementById("error").style.display = "";
+                        document.getElementById("error").innerText = "Error: " + xhr.responseText;
+                    }
+                }
+            };
+            xhr.send("input=" + encodeURIComponent(input));
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1>Youtube Video Summary</h1>
+    <input type="text" id="userInput" placeholder="Put link to YouTube video here"/>
+    <button onclick="submitForm()">Summarise</button>
+    <div id="spinner">
+        <div class="spinner-border"></div>
+        Preparing summary for your video
+    </div>
+    <div id="result" style="display: none"></div>
+    <div id="error" style="display: none"></div>
+</div>
+</body>
+</html>
