@@ -20,21 +20,15 @@ const defaultCacheExpiration = 12
 const defaultRequestsPerMinuteLimit = 5
 
 func main() {
-
-	summaryHandler, err := getSummaryHandler()
-	if err != nil {
-		panic(err)
-	}
-	indexHandler := handlers.NewIndexHandler
-
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
+	e.Renderer = handlers.NewIndexTemplate(content)
 
 	config := rateLimitConfig()
-
-	e.Renderer = handlers.NewIndexTemplate(content)
+	summaryHandler := getSummaryHandler()
+	indexHandler := handlers.NewIndexHandler
 
 	e.GET("/", indexHandler)
 	e.POST("/summary", summaryHandler.SummaryHandler, middleware.RateLimiterWithConfig(config))
@@ -68,7 +62,7 @@ func rateLimitConfig() middleware.RateLimiterConfig {
 	return config
 }
 
-func getSummaryHandler() (*handlers.SummaryHandler, error) {
+func getSummaryHandler() *handlers.SummaryHandler {
 	youtubeClient := NewYoutubeClient()
 	summaryClient := NewSummaryClient(os.Getenv("OPENAI_KEY"))
 
@@ -81,7 +75,7 @@ func getSummaryHandler() (*handlers.SummaryHandler, error) {
 		time.Duration(maxVideoDuration)*time.Minute,
 		time.Duration(cacheExpiration)*time.Hour,
 	)
-	return summaryHandler, nil
+	return summaryHandler
 }
 
 func getIntFromEnvOrDefault(key string, defaultValue int) int {

@@ -40,6 +40,8 @@ func (h *SummaryHandler) SummaryHandler(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Input cannot be empty")
 	}
 
+	log.Printf("Received input from user: %s\n", input)
+
 	videoId := input
 
 	if strings.Contains(input, "http") {
@@ -52,7 +54,7 @@ func (h *SummaryHandler) SummaryHandler(c echo.Context) error {
 
 	summaryFromCache, found := h.c.Get(videoId)
 	if found {
-		log.Printf("Found results in cache, returning")
+		log.Printf("Found results in cache for id %s, returning\n", videoId)
 		return c.String(http.StatusOK, summaryFromCache.(string))
 	}
 
