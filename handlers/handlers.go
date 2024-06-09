@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/patrickmn/go-cache"
 	"log"
 	"net/http"
 	"strings"
@@ -18,19 +17,24 @@ type summariseService interface {
 	GetSummary(text string) (string, error)
 }
 
+type cacheService interface {
+	Get(k string) (interface{}, bool)
+	Set(k string, x interface{}, d time.Duration)
+}
+
 type SummaryHandler struct {
 	youtube          youtubeService
 	summarise        summariseService
 	maxVideoDuration time.Duration
-	c                *cache.Cache
+	c                cacheService
 }
 
-func NewSummaryHandler(y youtubeService, s summariseService, maxVideoDuration time.Duration, cacheExpiration time.Duration) *SummaryHandler {
+func NewSummaryHandler(y youtubeService, s summariseService, cacheService cacheService, maxVideoDuration time.Duration) *SummaryHandler {
 	return &SummaryHandler{
 		youtube:          y,
 		summarise:        s,
 		maxVideoDuration: maxVideoDuration,
-		c:                cache.New(cacheExpiration, cacheExpiration*2),
+		c:                cacheService,
 	}
 }
 
@@ -73,6 +77,6 @@ func (h *SummaryHandler) SummaryHandler(c echo.Context) error {
 	}
 
 	log.Printf("Response from openai: %s\n", summary)
-	h.c.Set(videoId, summary, cache.DefaultExpiration)
+	h.c.Set(videoId, summary, 0)
 	return c.String(http.StatusOK, summary)
 }

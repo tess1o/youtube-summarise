@@ -22,6 +22,6 @@ func NewIndexTemplate(fs embed.FS) *Template {
 	}
 }
 
-func NewIndexHandler(c echo.Context) error {
+func IndexHandler(c echo.Context) error {
 	return c.Render(http.StatusOK, "index.html", map[string]interface{}{})
 }

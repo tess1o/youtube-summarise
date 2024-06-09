@@ -4,6 +4,7 @@ import (
 	"embed"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/patrickmn/go-cache"
 	"golang.org/x/time/rate"
 	"net/http"
 	"os"
@@ -15,9 +16,11 @@ import (
 //go:embed templates/index.html
 var content embed.FS
 
-const defaultMaxVideoDuration = 20
-const defaultCacheExpiration = 12
-const defaultRequestsPerMinuteLimit = 5
+const (
+	defaultMaxVideoDuration       = 20
+	defaultCacheExpiration        = 12
+	defaultRequestsPerMinuteLimit = 3
+)
 
 func main() {
 	e := echo.New()
@@ -28,7 +31,7 @@ func main() {
 
 	config := rateLimitConfig()
 	summaryHandler := getSummaryHandler()
-	indexHandler := handlers.NewIndexHandler
+	indexHandler := handlers.IndexHandler
 
 	e.GET("/", indexHandler)
 	e.POST("/summary", summaryHandler.SummaryHandler, middleware.RateLimiterWithConfig(config))
@@ -66,14 +69,16 @@ func getSummaryHandler() *handlers.SummaryHandler {
 	youtubeClient := NewYoutubeClient()
 	summaryClient := NewSummaryClient(os.Getenv("OPENAI_KEY"))
 
-	maxVideoDuration := getIntFromEnvOrDefault("MAX_VIDEO_DURATION_MINUTES", defaultMaxVideoDuration)
-	cacheExpiration := getIntFromEnvOrDefault("CACHE_EXPIRATION_HOURS", defaultCacheExpiration)
+	maxVideoDuration := time.Duration(getIntFromEnvOrDefault("MAX_VIDEO_DURATION_MINUTES", defaultMaxVideoDuration)) * time.Minute
+	cacheExpiration := time.Duration(getIntFromEnvOrDefault("CACHE_EXPIRATION_HOURS", defaultCacheExpiration)) * time.Hour
+
+	cacheService := cache.New(cacheExpiration, 2*cacheExpiration)
 
 	summaryHandler := handlers.NewSummaryHandler(
 		youtubeClient,
 		summaryClient,
-		time.Duration(maxVideoDuration)*time.Minute,
-		time.Duration(cacheExpiration)*time.Hour,
+		cacheService,
+		maxVideoDuration,
 	)
 	return summaryHandler
 }
